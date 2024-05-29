@@ -23,10 +23,12 @@ class Window:
 		self.PADDING2 = self.PADDING * 2
 
 		self.main_window = self.DISPLAY.set_mode(self.SIZE, pygame.RESIZABLE)
+		self.main_window.fill((15, 15, 0))
 		
 		self.index_window_size = ((self.WIDTH + self.PADDING2) // 6, self.HEIGHT - self.PADDING2)
 		self.index_window_position = (self.PADDING, self.PADDING)
 		self.index_window = self.SURFACE((self.index_window_size))
+		self.index_window.fill((31, 31, 0))
 
 		self.index_fontsize = 16
 		self.indexes = [[i * 16, self.FREETYPE.SysFont("sans", self.index_fontsize)] for i in range(self.index_window_size[1] // self.index_fontsize)]
@@ -34,17 +36,17 @@ class Window:
 		print(len(self.indexes))
 
 	def draw(self) -> None:
-		self.main_window.fill( (  0,   0,   0))	# (  0,   0,   0) BLACK
-		self.index_window.fill((255,   0,   0))	# (255,   0,   0) RED
+		self.rendered_indexes = [(i[1].render("%.6X" % i[0], (63, 63, 0)), (0, i[0] * 20)) for i in self.indexes]
 		
-		self.rendered_indexes = [(i[1].render("%.6X" % i[0]), (0, i[0] * 20)) for i in self.indexes]
-		
-		self.index_window.blits(blit_sequence=self.rendered_indexes, doreturn=1)
+		self.index_window.blits(self.rendered_indexes)
 		
 		self.main_window.blit(self.index_window, self.index_window_position)
 
 	def resize(self, size) -> None:
-		self.main_window = DISPLAY.set_mode(size, pygame.RESIZABLE)
+		self.WIDTH = size[0]
+		self.HEIGHT = size[1]
+		self.SIZE = size
+		self.main_window = DISPLAY.set_mode(self.SIZE, pygame.RESIZABLE)
 
 	def quit(self) -> None:
 		pygame.quit()
@@ -64,7 +66,8 @@ class Window:
 					# quit on ESC
 					if event.key == pygame.K_ESCAPE:
 						self.quit()
-
+				
+				# resizing window
 				if event.type == pygame.VIDEORESIZE:
 					self.resize((event.w, event.h))
 
